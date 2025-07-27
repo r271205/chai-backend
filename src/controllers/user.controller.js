@@ -25,7 +25,7 @@ if(
     throw new ApiError(400,"All fields are required !") 
 }
 
-const existedUser = User.findOne({
+const existedUser =  await User.findOne({
     $or: [{ userName },{ email }]
 })
 
@@ -51,6 +51,8 @@ if(!avatar){
     throw new ApiError(400,"Avatar file is required!")
 }
 
+
+
 //entry in database
 
 const user = await User.create({
@@ -62,14 +64,17 @@ const user = await User.create({
     userName:userName.toLowerCase()
 })
 
+//remove password and refresh token fields from response
+
 const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
 )
-
+//check for user creation
 if(!createdUser){
     throw new ApiError(500,"something went wrong while registring the user")
 }
 
+//return response
 return res.status(201).json(
     new ApiResponse(200,createdUser,"User registred Successfully")
 )
